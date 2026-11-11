@@ -4,9 +4,9 @@ A CLI that turns a Markdown project brief into a task breakdown with best, likel
 
 ## Status
 
-Early. The rule-based path works offline: parse a brief, estimate each task from keyword rules, combine the ranges, export Markdown or CSV.
+Usable offline for drafts. Parse a brief, estimate from keyword rules, **review every task**, export Markdown or CSV. An optional LLM path sits behind `ESTIMATE_KIT_LLM=1` and falls back to rules on any failure. Hour figures are still uncalibrated against real delivery data.
 
-Not built yet: the interactive review step (so nothing forces a human to look at the draft today), the optional LLM path, and any calibration against real project data. Until the review step exists, the Markdown output carries a line saying it has not been reviewed.
+Live demo: [Pages range calculator](https://mohamedtaqysalmi.github.io/estimate-kit/).
 
 ## Try it
 
@@ -19,9 +19,14 @@ pip install -e ".[dev]"
 
 estimate-kit estimate examples/riad-booking.md
 estimate-kit estimate examples/riad-booking.md --format csv --output estimate.csv
+estimate-kit estimate examples/riad-booking.md --skip-review   # draft stays marked unreviewed
 ```
 
 `--rules path/to/rules.toml` uses your own numbers instead of the built-in ones.
+
+### Review
+
+By default the CLI asks `[a]ccept` / `[e]dit` / `[d]rop` for each task. Export is marked reviewed only after that walk. Non-interactive runs need `--skip-review`.
 
 ## Example
 
@@ -62,12 +67,33 @@ Draft produced by keyword rules. It has not been reviewed by a person.
 
 The "Site available in English, French and Arabic" row shows a weak spot: no category keyword matched, so it got the generic range with a language multiplier. A person would size multilingual work differently.
 
+## Configuration
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `ESTIMATE_KIT_LLM` | unset / off | Set to `1` / `true` / `on` to try the LLM path first. |
+| `ESTIMATE_KIT_LLM_API_KEY` | — | API key (falls back to `OPENAI_API_KEY`). Required when LLM is on. |
+| `ESTIMATE_KIT_LLM_BASE_URL` | `https://api.openai.com/v1` | OpenAI-compatible base URL. |
+| `ESTIMATE_KIT_LLM_MODEL` | `gpt-4o-mini` | Chat model id. |
+
+Prompts live in [`prompts/v1/`](prompts/v1/) and are versioned with the pack folder name.
+
 ## How it works
 
+```mermaid
+flowchart LR
+  brief[Markdown brief] --> parse[Parse]
+  parse --> est[Rules or LLM]
+  est --> review[Human review]
+  review --> out[Markdown / CSV]
+```
+
 1. **Parsing.** Headings become sections and top-level bullets become tasks. Indented bullets are details of the bullet above. Sections such as "Out of scope" or "Background" are skipped and listed at the end of the output. The exact rules are in the docstring of [`brief.py`](src/estimate_kit/brief.py).
-2. **Rules.** Each task is matched against the categories in [`rules.toml`](src/estimate_kit/rules.toml) by keyword. Every hour figure, keyword, risk and assumption is in that one file. Modifiers (real-time, mobile, multilingual, migration, uploads) multiply the range.
-3. **Range math.** See [`ranges.py`](src/estimate_kit/ranges.py). Per task: expected = (best + 4 x likely + worst) / 6, spread = (worst - best) / 6. For the total, expected values add and spreads combine as the square root of the sum of squares. Best, likely and worst are validated so that best <= likely <= worst.
-4. **Export.** Markdown and CSV, UTF-8.
+2. **Rules (default).** Each task is matched against the categories in [`rules.toml`](src/estimate_kit/rules.toml) by keyword. Every hour figure, keyword, risk and assumption is in that one file. Modifiers (real-time, mobile, multilingual, migration, uploads) multiply the range.
+3. **LLM (optional).** When `ESTIMATE_KIT_LLM=1`, the brief is sent with the v1 prompt pack. Any error falls back to rules.
+4. **Review.** Accept, edit or drop each task. Required unless `--skip-review`.
+5. **Range math.** See [`ranges.py`](src/estimate_kit/ranges.py). Per task: expected = (best + 4 x likely + worst) / 6, spread = (worst - best) / 6. For the total, expected values add and spreads combine as the square root of the sum of squares. Best, likely and worst are validated so that best <= likely <= worst.
+6. **Export.** Markdown and CSV, UTF-8. Status line states whether a person reviewed the draft.
 
 ### Brief shapes it does not understand
 
@@ -93,7 +119,9 @@ Adding worst cases naively overstates the risk (every task going badly at once) 
 - Anything the brief does not mention is not estimated. Testing by others, meetings, revisions, content and project management are excluded (see the assumptions in the output).
 - The output is a draft. Read every row, change what you disagree with, and do not send it to a client unchecked.
 
-## Development
+## Testing
+
+See [docs/QA.md](docs/QA.md) for strategy and the manual checklist. Architecture notes: [docs/architecture.md](docs/architecture.md).
 
 ```bash
 pre-commit install
@@ -104,6 +132,21 @@ pytest
 ```
 
 `pytest` also reports coverage and fails below 85%. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Limitations and roadmap
+
+- Hour figures in `rules.toml` are starting points, not calibrated.
+- No live LLM test in CI; only mocked parsing.
+- Pages site teaches the math; it does not run the Python parser.
+- Next: calibration notes from real projects, richer review UX, prompt pack v2 if the JSON contract changes.
+
+## Security notes
+
+Report vulnerabilities privately via [SECURITY.md](SECURITY.md). Do not put client briefs or API keys in the repo. The LLM path sends the brief text to the configured provider when enabled.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

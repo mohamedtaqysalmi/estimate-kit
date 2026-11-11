@@ -57,6 +57,8 @@ class Estimate:
     risks: tuple[str, ...]
     assumptions: tuple[str, ...]
     skipped_sections: tuple[str, ...]
+    reviewed: bool = False
+    engine: str = "rules"
 
 
 def _category(data: dict[str, Any], name: str | None = None) -> CategoryRule:

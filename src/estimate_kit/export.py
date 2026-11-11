@@ -14,6 +14,8 @@ CSV_COLUMNS = (
     "worst_h",
     "expected_h",
     "spread_h",
+    "reviewed",
+    "engine",
 )
 
 
@@ -25,10 +27,18 @@ def _cell(text: str) -> str:
     return " ".join(text.split()).replace("|", "\\|")
 
 
+def _status_line(estimate: Estimate) -> str:
+    engine = "keyword rules" if estimate.engine == "rules" else "the LLM path"
+    if estimate.reviewed:
+        return f"Draft produced by {engine}. Reviewed by a person before export."
+    return f"Draft produced by {engine}. It has not been reviewed by a person."
+
+
 def to_csv(estimate: Estimate) -> str:
     buffer = io.StringIO()
     writer = csv.writer(buffer, lineterminator="\n")
     writer.writerow(CSV_COLUMNS)
+    reviewed = "yes" if estimate.reviewed else "no"
     for item in estimate.tasks:
         h = item.hours
         writer.writerow(
@@ -41,6 +51,8 @@ def to_csv(estimate: Estimate) -> str:
                 _h(h.worst),
                 _h(h.expected),
                 _h(h.spread),
+                reviewed,
+                estimate.engine,
             ]
         )
     return buffer.getvalue()
@@ -51,7 +63,7 @@ def to_markdown(estimate: Estimate) -> str:
     lines = [
         f"# Estimate: {_cell(estimate.title)}",
         "",
-        "Draft produced by keyword rules. It has not been reviewed by a person.",
+        _status_line(estimate),
         "",
         "## Summary",
         "",
