@@ -1,10 +1,14 @@
 # estimate-kit
 
-A CLI that turns a Markdown project brief into a task breakdown with best, likely and worst estimates, plus risks and assumptions. A human has to review the result before anything is exported.
+A CLI that turns a Markdown project brief into a task breakdown with best, likely and worst estimates, plus risks and assumptions. The output is a draft for a person to correct.
 
-Status: early scaffold, nothing usable yet.
+## Status
 
-## Development setup
+Early. The rule-based path works offline: parse a brief, estimate each task from keyword rules, combine the ranges, export Markdown or CSV.
+
+Not built yet: the interactive review step (so nothing forces a human to look at the draft today), the optional LLM path, and any calibration against real project data. Until the review step exists, the Markdown output carries a line saying it has not been reviewed.
+
+## Try it
 
 Requires Python 3.11 or newer.
 
@@ -12,19 +16,94 @@ Requires Python 3.11 or newer.
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
-pre-commit install
+
+estimate-kit estimate examples/riad-booking.md
+estimate-kit estimate examples/riad-booking.md --format csv --output estimate.csv
 ```
 
-## Running the checks
+`--rules path/to/rules.toml` uses your own numbers instead of the built-in ones.
+
+## Example
+
+[`examples/riad-booking.md`](examples/riad-booking.md) is an invented brief for a small guesthouse. This is the start of the real output of the command above (the full output also lists risks and assumptions per task, and ignored sections):
+
+```markdown
+# Estimate: Riad Lotus booking site
+
+Draft produced by keyword rules. It has not been reviewed by a person.
+
+## Summary
+
+| Measure | Hours |
+| --- | ---: |
+| Sum of best cases | 55.5 |
+| Sum of likely cases | 111.5 |
+| Expected (PERT) | 125.5 |
+| Plausible range (expected ± 2 spread) | 105.6 to 145.4 |
+| Sum of worst cases | 251.5 |
+
+## Tasks
+
+| Section | Task | Category | Best | Likely | Worst | Expected |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| Public site | Landing page with photo gallery and a short story about the riad | ui | 3.0 | 7.0 | 16.0 | 7.8 |
+| Public site | Room pages with prices per night and a calendar showing availability | ui | 3.0 | 7.0 | 16.0 | 7.8 |
+| Public site | Contact form that emails the owner | notifications | 3.0 | 7.0 | 16.0 | 7.8 |
+| Public site | Site available in English, French and Arabic | general | 2.5 | 6.5 | 15.5 | 7.3 |
+| Booking | Guests pick dates and a room, then pay a 30% deposit online with Stripe | payments | 10.0 | 18.0 | 40.0 | 20.3 |
+| Booking | Confirmation email with the booking details | notifications | 3.0 | 7.0 | 16.0 | 7.8 |
+| Booking | Reminder email three days before arrival | notifications | 3.0 | 7.0 | 16.0 | 7.8 |
+| Owner area | Owner login with password reset | auth | 6.0 | 10.0 | 20.0 | 11.0 |
+| Owner area | Admin screens to manage rooms, prices and blocked dates | admin | 8.0 | 14.0 | 30.0 | 15.7 |
+| Owner area | Monthly report of bookings and income, exportable as a spreadsheet | reporting | 5.0 | 10.0 | 22.0 | 11.2 |
+| Owner area | Import existing bookings from the owner's Excel sheet | integration | 6.0 | 12.0 | 30.0 | 14.0 |
+| Launch | Deploy to a standard host with a custom domain and daily backups | devops | 3.0 | 6.0 | 14.0 | 6.8 |
+```
+
+The "Site available in English, French and Arabic" row shows a weak spot: no category keyword matched, so it got the generic range with a language multiplier. A person would size multilingual work differently.
+
+## How it works
+
+1. **Parsing.** Headings become sections and top-level bullets become tasks. Indented bullets are details of the bullet above. Sections such as "Out of scope" or "Background" are skipped and listed at the end of the output. The exact rules are in the docstring of [`brief.py`](src/estimate_kit/brief.py).
+2. **Rules.** Each task is matched against the categories in [`rules.toml`](src/estimate_kit/rules.toml) by keyword. Every hour figure, keyword, risk and assumption is in that one file. Modifiers (real-time, mobile, multilingual, migration, uploads) multiply the range.
+3. **Range math.** See [`ranges.py`](src/estimate_kit/ranges.py). Per task: expected = (best + 4 x likely + worst) / 6, spread = (worst - best) / 6. For the total, expected values add and spreads combine as the square root of the sum of squares. Best, likely and worst are validated so that best <= likely <= worst.
+4. **Export.** Markdown and CSV, UTF-8.
+
+### Brief shapes it does not understand
+
+- Tables, prose paragraphs and requirements written as plain sentences. They are skipped without a warning.
+- Front matter, HTML, and links to other documents.
+- One bullet that contains several features ("login and billing" becomes one task).
+- Nested bullets are never separate tasks, even when they should be.
+- Only English keywords are matched.
+
+If the task list in the output does not match your brief, the brief shape is the problem. Reshape it as headings with one bullet per deliverable.
+
+## Why ranges
+
+A single number hides the thing a client most needs to know, which is how wrong it might be. A task that is 3 hours when everything goes right and 16 when one assumption fails is a different risk from one that is always 7. The tool keeps all three numbers per task and shows the spread in the total.
+
+Adding worst cases naively overstates the risk (every task going badly at once) and adding best cases understates it. The summary shows both sums next to the PERT total so you can see the gap.
+
+## How not to trust this tool
+
+- The hour figures in `rules.toml` are my rough starting points. They are not measured from past projects and nothing here has been calibrated against actual delivery times.
+- Keyword matching is crude. A task is categorised by words, not by understanding it. Check the Category column.
+- The plausible range treats tasks as independent. In real projects they are not: one wrong assumption about a client's data or approvals can slow many tasks together. The true uncertainty is wider than the "plausible range" line says.
+- Anything the brief does not mention is not estimated. Testing by others, meetings, revisions, content and project management are excluded (see the assumptions in the output).
+- The output is a draft. Read every row, change what you disagree with, and do not send it to a client unchecked.
+
+## Development
 
 ```bash
+pre-commit install
 ruff check .
 ruff format --check .
 mypy
 pytest
 ```
 
-`pytest` also reports coverage and fails below 85%.
+`pytest` also reports coverage and fails below 85%. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

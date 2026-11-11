@@ -1,0 +1,153 @@
+# Every number the rule-based estimator uses lives in this file.
+#
+# A task is matched against the categories below in file order. The first
+# category with a keyword found at the start of a word in the task title or its
+# indented detail bullets wins. If none match, [default] is used.
+#
+# Hours are for one developer including self-testing. They are rough starting
+# points chosen by the maintainer from general experience, not measured data.
+# Edit them to match how you work.
+#
+# Modifiers are checked independently of the category. Every modifier that
+# matches multiplies best, likely and worst by its factor (factors multiply
+# together), and adds its risk to the output. Results are rounded to 0.5 hours.
+
+[parsing]
+# Bullets under a heading whose text contains one of these are not tasks.
+skip_sections = [
+  "out of scope",
+  "non-goal",
+  "not in scope",
+  "background",
+  "context",
+  "assumption",
+  "open question",
+  "budget",
+  "timeline",
+]
+
+[project]
+assumptions = [
+  "Estimates cover one developer's build and self-testing only. Design, project management, content, QA by others and hosting costs are not included.",
+  "The brief is taken as written. Anything it leaves out is not estimated.",
+  "Hours are rough starting points from the rules file, not measurements of past projects.",
+]
+
+[default]
+name = "general"
+best = 2
+likely = 5
+worst = 12
+risks = ["Scope of this task is unclear from the brief."]
+assumptions = ["No keyword rule matched, so the generic range was used."]
+
+[[category]]
+name = "auth"
+keywords = ["login", "log in", "sign in", "sign up", "signup", "register", "password", "oauth", "sso", "authentication", "account"]
+best = 6
+likely = 10
+worst = 20
+risks = ["Password reset, email verification and session handling are often added after the first draft."]
+assumptions = ["Standard email and password sign-in, using an existing library rather than custom crypto."]
+
+[[category]]
+name = "payments"
+keywords = ["payment", "checkout", "stripe", "paypal", "billing", "invoice", "subscription", "refund"]
+best = 10
+likely = 18
+worst = 40
+risks = ["Payment provider approval, webhooks and failure cases tend to take longer than the happy path."]
+assumptions = ["One payment provider with a hosted checkout, no custom card handling."]
+
+[[category]]
+name = "integration"
+keywords = ["integration", "integrate", "api", "webhook", "third-party", "third party", "sync", "import", "connect to"]
+best = 6
+likely = 12
+worst = 30
+risks = ["The external service may have poor documentation, rate limits or changes outside our control."]
+assumptions = ["The external service has a documented API and a sandbox to test against."]
+
+[[category]]
+name = "reporting"
+keywords = ["report", "analytics", "chart", "statistics", "export", "dashboard"]
+best = 5
+likely = 10
+worst = 22
+risks = ["Report definitions usually change once the client sees real numbers."]
+assumptions = ["Reports are generated from data the system already stores."]
+
+[[category]]
+name = "notifications"
+keywords = ["email", "notification", "sms", "reminder", "newsletter", "alert"]
+best = 3
+likely = 7
+worst = 16
+risks = ["Deliverability and template wording take back-and-forth with the client."]
+assumptions = ["A transactional email or SMS provider is used; no own mail server."]
+
+[[category]]
+name = "search"
+keywords = ["search", "filter", "sort"]
+best = 4
+likely = 8
+worst = 18
+risks = ["Relevance expectations can grow beyond simple filtering."]
+assumptions = ["Database queries are enough; no dedicated search engine."]
+
+[[category]]
+name = "admin"
+keywords = ["admin", "back office", "backoffice", "manage", "moderat"]
+best = 8
+likely = 14
+worst = 30
+risks = ["Admin screens grow quickly because every data type needs its own."]
+assumptions = ["Plain CRUD screens with no custom workflow."]
+
+[[category]]
+name = "ui"
+keywords = ["page", "landing", "homepage", "home page", "responsive", "form", "gallery", "layout", "design"]
+best = 3
+likely = 7
+worst = 16
+risks = ["Visual feedback rounds are hard to predict."]
+assumptions = ["Design or a clear reference is provided; this covers building it."]
+
+[[category]]
+name = "devops"
+keywords = ["deploy", "hosting", "docker", "ci/cd", "backup", "monitoring", "domain"]
+best = 3
+likely = 6
+worst = 14
+risks = ["Access to the client's hosting or DNS can block progress."]
+assumptions = ["One environment on a standard host."]
+
+[[modifier]]
+name = "realtime"
+keywords = ["real-time", "realtime", "websocket", "live update", "live tracking", "chat"]
+factor = 1.5
+risk = "Real-time features add connection handling and testing effort."
+
+[[modifier]]
+name = "mobile"
+keywords = ["mobile app", "ios", "android", "offline"]
+factor = 1.4
+risk = "Mobile or offline behaviour adds device testing and store or sync complications."
+
+[[modifier]]
+name = "multilingual"
+keywords = ["multi-language", "multilingual", "translation", "i18n", "rtl", "arabic", "french"]
+factor = 1.3
+risk = "Several languages, especially right-to-left ones, touch every screen and need translated content."
+
+[[modifier]]
+name = "migration"
+keywords = ["migration", "migrate", "legacy", "existing data"]
+factor = 1.4
+risk = "Existing data is usually messier than described."
+
+[[modifier]]
+name = "uploads"
+keywords = ["upload", "video", "image", "pdf", "attachment"]
+factor = 1.2
+risk = "File handling needs size limits, storage and validation."

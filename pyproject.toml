@@ -23,7 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = ["typer>=0.12"]
 
 [project.optional-dependencies]
 dev = [
@@ -34,6 +34,9 @@ dev = [
     "pre-commit",
     "build",
 ]
+
+[project.scripts]
+estimate-kit = "estimate_kit.cli:app"
 
 [project.urls]
 Homepage = "https://mohamedtaqysalmi.github.io/estimate-kit/"
