@@ -35,11 +35,18 @@ def _estimate(title: str = "Café site", sections: tuple[str, ...] = ()) -> Esti
 
 def test_csv_exact_output_with_escaping_and_unicode() -> None:
     expected = (
-        "section,task,category,best_h,likely_h,worst_h,expected_h,spread_h\n"
-        'Réservation,"Pay, then ""confirm"" | email",payments,10.0,18.0,40.0,20.3,5.0\n'
-        "Public,Page d'accueil été مرحبا,ui,3.0,7.0,16.0,7.8,2.2\n"
+        "section,task,category,best_h,likely_h,worst_h,expected_h,spread_h,reviewed,engine\n"
+        'Réservation,"Pay, then ""confirm"" | email",payments,10.0,18.0,40.0,20.3,5.0,no,rules\n'
+        "Public,Page d'accueil été مرحبا,ui,3.0,7.0,16.0,7.8,2.2,no,rules\n"
     )
     assert to_csv(_estimate()) == expected
+
+
+def test_csv_header_includes_review_and_engine() -> None:
+    header = to_csv(_estimate()).splitlines()[0]
+    assert header == (
+        "section,task,category,best_h,likely_h,worst_h,expected_h,spread_h,reviewed,engine"
+    )
 
 
 def test_markdown_exact_output() -> None:
@@ -83,6 +90,23 @@ def test_markdown_lists_ignored_sections_and_handles_no_risks() -> None:
     )
     assert "- None recorded." in text
     assert text.endswith("## Ignored sections\n\n- Out of scope\n")
+
+
+def test_markdown_reviewed_status_line() -> None:
+    est = _estimate()
+    reviewed = Estimate(
+        est.title,
+        est.tasks,
+        est.total,
+        est.risks,
+        est.assumptions,
+        est.skipped_sections,
+        reviewed=True,
+        engine="rules",
+    )
+    text = to_markdown(reviewed)
+    assert "Reviewed by a person before export." in text
+    assert "has not been reviewed" not in text
 
 
 def test_markdown_cell_collapses_newlines() -> None:

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>estimate-kit — draft ranges, human review required</title>
+    <meta
+      name="description"
+      content="Turn a Markdown brief into best / likely / worst hour ranges. Rule-based offline, optional LLM, mandatory human review before you send anything to a client."
+    />
+    <meta property="og:title" content="estimate-kit" />
+    <meta
+      property="og:description"
+      content="Draft estimate ranges from a project brief. Review is mandatory. Do not trust the numbers blindly."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://mohamedtaqysalmi.github.io/estimate-kit/" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@500;700;800&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#calculator">Skip to range calculator</a>
+    <header class="bar">
+      <strong class="bar-brand">estimate-kit</strong>
+      <nav aria-label="Primary">
+        <a href="#example">Example</a>
+        <a href="#calculator">Calculator</a>
+        <a href="https://github.com/mohamedtaqysalmi/estimate-kit">GitHub</a>
+      </nav>
+    </header>
+
+    <section class="hero" aria-label="Introduction">
+      <p class="hero-brand">estimate-kit</p>
+      <h1>Draft hour ranges from a brief. A person still has to check every row.</h1>
+      <p class="hero-lede">
+        Markdown in, best / likely / worst out. Keyword rules work offline; an LLM path stays behind
+        an env flag. Export stays marked unreviewed until you accept or edit each task.
+      </p>
+      <div class="hero-cta">
+        <a class="btn primary" href="#calculator">Open the range calculator</a>
+        <a class="btn ghost" href="#example">See brief → output</a>
+      </div>
+    </section>
+
+    <main>
+      <section class="block" id="example" aria-labelledby="example-title">
+        <h2 id="example-title">Brief → draft output</h2>
+        <p class="lede">
+          From <code>examples/riad-booking.md</code>. These hours are rule guesses, not a quote.
+        </p>
+        <div class="split">
+          <article>
+            <h3>Input brief (excerpt)</h3>
+            <pre class="sheet" tabindex="0">## Booking
+- Guests pick dates and a room, then pay a 30% deposit online with Stripe
+- Confirmation email with the booking details
+
+## Owner area
+- Owner login with password reset
+- Admin screens to manage rooms, prices and blocked dates</pre>
+          </article>
+          <article>
+            <h3>Rule-based draft (excerpt)</h3>
+            <pre class="sheet" tabindex="0">Draft produced by keyword rules. It has not been reviewed by a person.
+
+| Task | Cat | Best | Likely | Worst | Exp |
+| Stripe deposit | payments | 10 | 18 | 40 | 20.3 |
+| Confirmation email | notifications | 3 | 7 | 16 | 7.8 |
+| Owner login | auth | 6 | 10 | 20 | 11.0 |
+| Admin screens | admin | 8 | 14 | 30 | 15.7 |</pre>
+          </article>
+        </div>
+        <p class="caution">
+          Read <a href="https://github.com/mohamedtaqysalmi/estimate-kit#how-not-to-trust-this-tool"
+            >How not to trust this tool</a
+          >
+          before you show numbers to a client.
+        </p>
+      </section>
+
+      <section class="block" id="calculator" aria-labelledby="calc-title">
+        <h2 id="calc-title">Range calculator</h2>
+        <p class="lede">
+          Same PERT math as the CLI: expected = (best + 4×likely + worst) / 6, spread =
+          (worst − best) / 6. Totals add expected values and combine spreads as √Σspread².
+        </p>
+
+        <form id="calc-form" class="calc" novalidate>
+          <div class="calc-head">
+            <span>Task label</span>
+            <span>Best</span>
+            <span>Likely</span>
+            <span>Worst</span>
+            <span class="sr">Remove</span>
+          </div>
+          <div id="rows" class="rows" aria-live="polite"></div>
+          <div class="calc-actions">
+            <button type="button" class="btn ghost" id="add-row">Add task</button>
+            <button type="submit" class="btn primary">Recalculate</button>
+          </div>
+        </form>
+
+        <div class="totals" id="totals" aria-live="polite">
+          <dl>
+            <div><dt>Sum of best</dt><dd id="sum-best">—</dd></div>
+            <div><dt>Sum of likely</dt><dd id="sum-likely">—</dd></div>
+            <div><dt>Expected (PERT)</dt><dd id="sum-expected">—</dd></div>
+            <div><dt>Plausible range (±2σ)</dt><dd id="sum-range">—</dd></div>
+            <div><dt>Sum of worst</dt><dd id="sum-worst">—</dd></div>
+          </dl>
+          <p class="note">
+            The plausible range assumes independent tasks. Real projects are correlated, so treat
+            this band as a lower bound on uncertainty.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <p>
+        MIT ·
+        <a href="https://github.com/mohamedtaqysalmi/estimate-kit">mohamedtaqysalmi/estimate-kit</a>
+      </p>
+    </footer>
+    <script src="app.js"></script>
+  </body>
+</html>

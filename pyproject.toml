@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "estimate-kit"
-version = "0.0.1"
+version = "0.1.0"
 description = "Turn a project brief into a task breakdown with estimate ranges, and force a human review before export."
 readme = "README.md"
 license = "MIT"
@@ -45,6 +45,9 @@ Issues = "https://github.com/mohamedtaqysalmi/estimate-kit/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/estimate_kit"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"prompts" = "estimate_kit/prompts"
 
 [tool.ruff]
 line-length = 100
