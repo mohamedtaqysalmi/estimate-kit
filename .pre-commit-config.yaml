@@ -19,7 +19,7 @@ repos:
     rev: v2.4.1
     hooks:
       - id: mypy
-        additional_dependencies: [pytest]
+        additional_dependencies: [pytest, typer]
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.1
     hooks:
