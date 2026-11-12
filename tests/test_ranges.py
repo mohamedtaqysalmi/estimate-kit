@@ -67,3 +67,14 @@ def test_combine_empty() -> None:
     total = combine([])
     assert total.expected == 0
     assert total.low == total.high == 0
+
+
+@pytest.mark.parametrize("value", [float("inf"), float("nan"), -float("inf")])
+def test_non_finite_hours_are_rejected(value: float) -> None:
+    with pytest.raises(ValueError, match="finite"):
+        ThreePoint(value, value, value)
+
+
+def test_rounding_huge_values_does_not_overflow() -> None:
+    p = ThreePoint(1e308, 1e308, 1e308).rounded()
+    assert p.worst == 1e308

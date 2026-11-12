@@ -58,6 +58,7 @@ class Estimate:
     assumptions: tuple[str, ...]
     skipped_sections: tuple[str, ...]
     reviewed: bool = False
+    project_assumptions: tuple[str, ...] = ()
     engine: str = "rules"
 
 
@@ -116,7 +117,7 @@ def estimate_task(task: BriefTask, rules: RuleSet) -> EstimatedTask:
     )
 
 
-def _gather(items: list[tuple[str, str]]) -> tuple[str, ...]:
+def gather(items: list[tuple[str, str]]) -> tuple[str, ...]:
     """Merge (text, task title) pairs so each text appears once with its tasks."""
     by_text: dict[str, list[str]] = {}
     for text, title in items:
@@ -128,8 +129,8 @@ def _gather(items: list[tuple[str, str]]) -> tuple[str, ...]:
 
 def estimate_brief(brief: Brief, rules: RuleSet) -> Estimate:
     tasks = tuple(estimate_task(t, rules) for t in brief.tasks)
-    risks = _gather([(r, t.task.title) for t in tasks for r in t.risks])
-    task_assumptions = _gather([(a, t.task.title) for t in tasks for a in t.assumptions])
+    risks = gather([(r, t.task.title) for t in tasks for r in t.risks])
+    task_assumptions = gather([(a, t.task.title) for t in tasks for a in t.assumptions])
     return Estimate(
         title=brief.title,
         tasks=tasks,
@@ -137,4 +138,5 @@ def estimate_brief(brief: Brief, rules: RuleSet) -> Estimate:
         risks=risks,
         assumptions=(*rules.project_assumptions, *task_assumptions),
         skipped_sections=brief.skipped_sections,
+        project_assumptions=rules.project_assumptions,
     )

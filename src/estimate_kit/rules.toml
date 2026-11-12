@@ -13,7 +13,8 @@
 # together), and adds its risk to the output. Results are rounded to 0.5 hours.
 
 [parsing]
-# Bullets under a heading whose text contains one of these are not tasks.
+# Bullets under a heading that is exactly one of these (ignoring case, a trailing
+# "s" and a parenthetical) are not tasks.
 skip_sections = [
   "out of scope",
   "non-goal",

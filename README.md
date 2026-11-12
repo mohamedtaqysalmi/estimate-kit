@@ -76,7 +76,7 @@ The "Site available in English, French and Arabic" row shows a weak spot: no cat
 | `ESTIMATE_KIT_LLM_BASE_URL` | `https://api.openai.com/v1` | OpenAI-compatible base URL. |
 | `ESTIMATE_KIT_LLM_MODEL` | `gpt-4o-mini` | Chat model id. |
 
-Prompts live in [`prompts/v1/`](prompts/v1/) and are versioned with the pack folder name.
+Prompts live in [`prompts/v1/`](prompts/v1/) and are versioned with the pack folder name. The base URL must be https (plain http is accepted only for localhost) because the API key is sent in a header. Malformed model output, a missing key or a network error prints a message on stderr and falls back to the keyword rules.
 
 ## How it works
 
@@ -88,17 +88,17 @@ flowchart LR
   review --> out[Markdown / CSV]
 ```
 
-1. **Parsing.** Headings become sections and top-level bullets become tasks. Indented bullets are details of the bullet above. Sections such as "Out of scope" or "Background" are skipped and listed at the end of the output. The exact rules are in the docstring of [`brief.py`](src/estimate_kit/brief.py).
+1. **Parsing.** Headings become sections and top-level bullets become tasks. Indented bullets are details of the bullet above. A section whose whole heading is "Out of scope", "Background", "Assumptions" and a few similar names (see `skip_sections` in `rules.toml`) is skipped and listed at the end of the output; "Background jobs" is not skipped. The exact rules are in the docstring of [`brief.py`](src/estimate_kit/brief.py).
 2. **Rules (default).** Each task is matched against the categories in [`rules.toml`](src/estimate_kit/rules.toml) by keyword. Every hour figure, keyword, risk and assumption is in that one file. Modifiers (real-time, mobile, multilingual, migration, uploads) multiply the range.
 3. **LLM (optional).** When `ESTIMATE_KIT_LLM=1`, the brief is sent with the v1 prompt pack. Any error falls back to rules.
-4. **Review.** Accept, edit or drop each task. Required unless `--skip-review`.
+4. **Review.** Accept, edit or drop each task. Required unless `--skip-review`. Quitting midway exports nothing.
 5. **Range math.** See [`ranges.py`](src/estimate_kit/ranges.py). Per task: expected = (best + 4 x likely + worst) / 6, spread = (worst - best) / 6. For the total, expected values add and spreads combine as the square root of the sum of squares. Best, likely and worst are validated so that best <= likely <= worst.
 6. **Export.** Markdown and CSV, UTF-8. Status line states whether a person reviewed the draft.
 
 ### Brief shapes it does not understand
 
 - Tables, prose paragraphs and requirements written as plain sentences. They are skipped without a warning.
-- Front matter, HTML, and links to other documents.
+- HTML other than comments, and links to other documents. (A byte order mark, YAML front matter, HTML comments, code fences and horizontal rules are ignored.)
 - One bullet that contains several features ("login and billing" becomes one task).
 - Nested bullets are never separate tasks, even when they should be.
 - Only English keywords are matched.
@@ -114,6 +114,7 @@ Adding worst cases naively overstates the risk (every task going badly at once) 
 ## How not to trust this tool
 
 - The hour figures in `rules.toml` are my rough starting points. They are not measured from past projects and nothing here has been calibrated against actual delivery times.
+- CSV export prefixes cells that start with `=`, `+`, `-` or `@` with a single quote, so a spreadsheet does not run them as formulas. The quote is part of the cell text.
 - Keyword matching is crude. A task is categorised by words, not by understanding it. Check the Category column.
 - The plausible range treats tasks as independent. In real projects they are not: one wrong assumption about a client's data or approvals can slow many tasks together. The true uncertainty is wider than the "plausible range" line says.
 - Anything the brief does not mention is not estimated. Testing by others, meetings, revisions, content and project management are excluded (see the assumptions in the output).
@@ -121,7 +122,7 @@ Adding worst cases naively overstates the risk (every task going badly at once) 
 
 ## Testing
 
-See [docs/QA.md](docs/QA.md) for strategy and the manual checklist. Architecture notes: [docs/architecture.md](docs/architecture.md).
+See [QA.md](QA.md) for strategy and the manual checklist, and [TEST_REPORT.md](TEST_REPORT.md) for the last run. Architecture notes: [docs/architecture.md](docs/architecture.md). CLI options: [docs/cli.md](docs/cli.md).
 
 ```bash
 pre-commit install

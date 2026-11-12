@@ -11,7 +11,7 @@ from collections.abc import Callable
 from dataclasses import replace
 
 from estimate_kit.ranges import ThreePoint, combine
-from estimate_kit.rules import Estimate, EstimatedTask, _gather
+from estimate_kit.rules import Estimate, EstimatedTask, gather
 
 PrintFn = Callable[[str], None]
 InputFn = Callable[[str], str]
@@ -60,6 +60,11 @@ def review_estimate(
                 f"  best={h.best:.1f}  likely={h.likely:.1f}  worst={h.worst:.1f}  "
                 f"expected={h.expected:.1f}"
             )
+            # Accepting a task also accepts the risks and assumptions that go with it.
+            for risk in item.risks:
+                print_fn(f"  risk: {risk}")
+            for assumption in item.assumptions:
+                print_fn(f"  assumes: {assumption}")
             choice = input_fn("  [a/e/d] > ").strip().lower()
             if choice in {"a", "accept"}:
                 kept.append(item)
@@ -87,17 +92,16 @@ def review_estimate(
     if not kept:
         raise ValueError("No tasks left after review. Nothing to export.")
 
-    risks = _gather([(r, t.task.title) for t in kept for r in t.risks])
-    task_assumptions = _gather([(a, t.task.title) for t in kept for a in t.assumptions])
-    # Keep project-level assumptions (those without a task title suffix) from the draft.
-    project_assumptions = tuple(a for a in estimate.assumptions if " (" not in a)
+    risks = gather([(r, t.task.title) for t in kept for r in t.risks])
+    task_assumptions = gather([(a, t.task.title) for t in kept for a in t.assumptions])
     return Estimate(
         title=estimate.title,
         tasks=tuple(kept),
         total=combine(t.hours for t in kept),
         risks=risks,
-        assumptions=(*project_assumptions, *task_assumptions),
+        assumptions=(*estimate.project_assumptions, *task_assumptions),
         skipped_sections=estimate.skipped_sections,
         reviewed=True,
         engine=estimate.engine,
+        project_assumptions=estimate.project_assumptions,
     )

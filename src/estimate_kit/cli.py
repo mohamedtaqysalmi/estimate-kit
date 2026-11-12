@@ -70,7 +70,7 @@ def estimate(
 ) -> None:
     """Read BRIEF, estimate, force a human review, then print Markdown or CSV."""
     rule_set = load_rules(rules)
-    parsed = parse_brief(brief.read_text(encoding="utf-8"), rule_set.skip_sections)
+    parsed = parse_brief(brief.read_text(encoding="utf-8-sig"), rule_set.skip_sections)
     if not parsed.tasks:
         typer.echo(
             "No tasks found. The brief needs bullet lists under headings; see the README.",
