@@ -1,0 +1,183 @@
+{
+  "description": "Shared by tests/test_range_vectors.py and tests/js/ranges.test.mjs. Totals use expected + or - 2 spread, clamped to the sums of best and worst.",
+  "tolerance": 1e-09,
+  "cases": [
+    {
+      "name": "single task 2/4/12",
+      "tasks": [
+        [
+          2,
+          4,
+          12
+        ]
+      ],
+      "total": {
+        "best": 2,
+        "likely": 4,
+        "worst": 12,
+        "expected": 5.0,
+        "spread": 1.6666666667,
+        "low": 2,
+        "high": 8.3333333333
+      }
+    },
+    {
+      "name": "two tasks 2/4/12 and 1/2/3",
+      "tasks": [
+        [
+          2,
+          4,
+          12
+        ],
+        [
+          1,
+          2,
+          3
+        ]
+      ],
+      "total": {
+        "best": 3,
+        "likely": 6,
+        "worst": 15,
+        "expected": 7.0,
+        "spread": 1.6996731712,
+        "low": 3.6006536576,
+        "high": 10.3993463424
+      }
+    },
+    {
+      "name": "skewed task clamps the low end",
+      "tasks": [
+        [
+          0,
+          0,
+          12
+        ]
+      ],
+      "total": {
+        "best": 0,
+        "likely": 0,
+        "worst": 12,
+        "expected": 2.0,
+        "spread": 2.0,
+        "low": 0,
+        "high": 6.0
+      }
+    },
+    {
+      "name": "no uncertainty",
+      "tasks": [
+        [
+          4,
+          4,
+          4
+        ]
+      ],
+      "total": {
+        "best": 4,
+        "likely": 4,
+        "worst": 4,
+        "expected": 4.0,
+        "spread": 0.0,
+        "low": 4,
+        "high": 4
+      }
+    },
+    {
+      "name": "riad example, 12 tasks",
+      "tasks": [
+        [
+          3,
+          7,
+          16
+        ],
+        [
+          3,
+          7,
+          16
+        ],
+        [
+          3,
+          7,
+          16
+        ],
+        [
+          2.5,
+          6.5,
+          15.5
+        ],
+        [
+          10,
+          18,
+          40
+        ],
+        [
+          3,
+          7,
+          16
+        ],
+        [
+          3,
+          7,
+          16
+        ],
+        [
+          6,
+          10,
+          20
+        ],
+        [
+          8,
+          14,
+          30
+        ],
+        [
+          5,
+          10,
+          22
+        ],
+        [
+          6,
+          12,
+          30
+        ],
+        [
+          3,
+          6,
+          14
+        ]
+      ],
+      "total": {
+        "best": 55.5,
+        "likely": 111.5,
+        "worst": 251.5,
+        "expected": 125.5,
+        "spread": 9.9721835344,
+        "low": 105.5556329311,
+        "high": 145.4443670689
+      }
+    }
+  ],
+  "invalid": [
+    [
+      3,
+      2,
+      5
+    ],
+    [
+      1,
+      4,
+      3
+    ],
+    [
+      -1,
+      2,
+      3
+    ],
+    [
+      5,
+      3,
+      1
+    ]
+  ]
+}

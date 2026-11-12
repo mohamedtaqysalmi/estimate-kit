@@ -3,130 +3,449 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>estimate-kit — draft ranges, human review required</title>
+    <title>estimate-kit: hour ranges from a project brief, reviewed by a person</title>
     <meta
       name="description"
-      content="Turn a Markdown brief into best / likely / worst hour ranges. Rule-based offline, optional LLM, mandatory human review before you send anything to a client."
+      content="A CLI that turns a Markdown project brief into best, likely and worst hour ranges with risks and assumptions. Offline by default, optional LLM path, a review step before export, and a range calculator that runs in the browser."
     />
     <meta property="og:title" content="estimate-kit" />
     <meta
       property="og:description"
-      content="Draft estimate ranges from a project brief. Review is mandatory. Do not trust the numbers blindly."
+      content="Turn a project brief into a task breakdown with estimate ranges, and force a human review before export."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mohamedtaqysalmi.github.io/estimate-kit/" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@500;700;800&family=Source+Sans+3:wght@400;600&display=swap"
-      rel="stylesheet"
+    <meta property="og:image" content="https://mohamedtaqysalmi.github.io/estimate-kit/og.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="estimate-kit" />
+    <meta
+      name="twitter:description"
+      content="Turn a project brief into a task breakdown with estimate ranges, and force a human review before export."
     />
-    <link rel="stylesheet" href="styles.css" />
+    <meta name="twitter:image" content="https://mohamedtaqysalmi.github.io/estimate-kit/og.svg" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="base.css" />
+    <link rel="stylesheet" href="page.css" />
   </head>
   <body>
-    <a class="skip" href="#calculator">Skip to range calculator</a>
-    <header class="bar">
-      <strong class="bar-brand">estimate-kit</strong>
-      <nav aria-label="Primary">
+    <a class="skip-link" href="#demo">Skip to the calculator</a>
+
+    <header class="wrap site-header">
+      <a class="brand" href="./">
+        <img src="favicon.svg" alt="" width="28" height="28" />
+        estimate-kit
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="#demo">Calculator</a>
         <a href="#example">Example</a>
-        <a href="#calculator">Calculator</a>
+        <a href="#trust">Trust</a>
         <a href="https://github.com/mohamedtaqysalmi/estimate-kit">GitHub</a>
       </nav>
     </header>
 
-    <section class="hero" aria-label="Introduction">
-      <p class="hero-brand">estimate-kit</p>
-      <h1>Draft hour ranges from a brief. A person still has to check every row.</h1>
-      <p class="hero-lede">
-        Markdown in, best / likely / worst out. Keyword rules work offline; an LLM path stays behind
-        an env flag. Export stays marked unreviewed until you accept or edit each task.
-      </p>
-      <div class="hero-cta">
-        <a class="btn primary" href="#calculator">Open the range calculator</a>
-        <a class="btn ghost" href="#example">See brief → output</a>
-      </div>
-    </section>
-
     <main>
-      <section class="block" id="example" aria-labelledby="example-title">
-        <h2 id="example-title">Brief → draft output</h2>
+      <section class="wrap hero">
+        <p class="eyebrow">Python CLI · Typer · Markdown in, CSV out</p>
+        <h1>Turn a project brief into hour ranges, then check every row yourself.</h1>
         <p class="lede">
-          From <code>examples/riad-booking.md</code>. These hours are rule guesses, not a quote.
+          A single number for a quote hides how wrong it might be. I wrote this to turn a Markdown
+          brief into best, likely and worst hours per task, with risks and assumptions, and to make
+          me review each estimate before anything is exported. It runs offline on keyword rules; an
+          LLM path exists but is off unless you switch it on.
         </p>
-        <div class="split">
-          <article>
-            <h3>Input brief (excerpt)</h3>
-            <pre class="sheet" tabindex="0">## Booking
-- Guests pick dates and a room, then pay a 30% deposit online with Stripe
-- Confirmation email with the booking details
-
-## Owner area
-- Owner login with password reset
-- Admin screens to manage rooms, prices and blocked dates</pre>
-          </article>
-          <article>
-            <h3>Rule-based draft (excerpt)</h3>
-            <pre class="sheet" tabindex="0">Draft produced by keyword rules. It has not been reviewed by a person.
-
-| Task | Cat | Best | Likely | Worst | Exp |
-| Stripe deposit | payments | 10 | 18 | 40 | 20.3 |
-| Confirmation email | notifications | 3 | 7 | 16 | 7.8 |
-| Owner login | auth | 6 | 10 | 20 | 11.0 |
-| Admin screens | admin | 8 | 14 | 30 | 15.7 |</pre>
-          </article>
+        <div class="actions">
+          <a class="btn btn-primary" href="#demo">Try the range calculator</a>
+          <a class="btn" href="https://github.com/mohamedtaqysalmi/estimate-kit">View the code</a>
         </div>
-        <p class="caution">
-          Read <a href="https://github.com/mohamedtaqysalmi/estimate-kit#how-not-to-trust-this-tool"
-            >How not to trust this tool</a
-          >
-          before you show numbers to a client.
-        </p>
+        <dl class="facts">
+          <div>
+            <dt>release</dt>
+            <dd>v0.1.0</dd>
+          </div>
+          <div>
+            <dt>python</dt>
+            <dd>3.11 to 3.14</dd>
+          </div>
+          <div>
+            <dt>default path</dt>
+            <dd>offline</dd>
+          </div>
+          <div>
+            <dt>license</dt>
+            <dd>MIT</dd>
+          </div>
+        </dl>
       </section>
 
-      <section class="block" id="calculator" aria-labelledby="calc-title">
-        <h2 id="calc-title">Range calculator</h2>
-        <p class="lede">
-          Same PERT math as the CLI: expected = (best + 4×likely + worst) / 6, spread =
-          (worst − best) / 6. Totals add expected values and combine spreads as √Σspread².
-        </p>
+      <section class="wrap section" id="demo" aria-labelledby="demo-title">
+        <div class="section-head">
+          <h2 id="demo-title">Range calculator</h2>
+        </div>
+        <div class="section-body flow">
+          <p>
+            Enter best, likely and worst hours for each task. Each task gets an expected value
+            <code>(best + 4 x likely + worst) / 6</code> and a spread <code>(worst - best) / 6</code>.
+            The total adds the expected values and combines the spreads as the square root of the
+            sum of squares. This is the same math as the Python package, checked against shared
+            test vectors in <code>site/range-vectors.json</code>.
+          </p>
+          <form id="calc-form" class="calc flow" novalidate>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Task</th>
+                    <th scope="col">Best</th>
+                    <th scope="col">Likely</th>
+                    <th scope="col">Worst</th>
+                    <th scope="col" class="num">Expected</th>
+                    <th scope="col" class="num">Spread</th>
+                    <th scope="col"><span class="visually-hidden">Remove</span></th>
+                  </tr>
+                </thead>
+                <tbody id="rows"></tbody>
+              </table>
+            </div>
+            <div class="calc-actions">
+              <button type="button" class="btn" id="add-row">Add a task</button>
+            </div>
+            <div id="calc-error" class="callout calc-error" role="alert" hidden></div>
+            <dl class="totals" aria-live="polite">
+              <div>
+                <dt>Sum of best cases</dt>
+                <dd id="sum-best">-</dd>
+              </div>
+              <div>
+                <dt>Sum of likely cases</dt>
+                <dd id="sum-likely">-</dd>
+              </div>
+              <div class="headline">
+                <dt>Expected (PERT)</dt>
+                <dd id="sum-expected">-</dd>
+              </div>
+              <div>
+                <dt>Spread of the total</dt>
+                <dd id="sum-spread">-</dd>
+              </div>
+              <div class="headline">
+                <dt>Plausible range (expected ± 2 spread)</dt>
+                <dd id="sum-range">-</dd>
+              </div>
+              <div>
+                <dt>Sum of worst cases</dt>
+                <dd id="sum-worst">-</dd>
+              </div>
+            </dl>
+            <p class="hint">
+              The plausible range is clamped to the sums of best and worst cases. It treats tasks
+              as independent, which real projects are not, so the true uncertainty is wider.
+            </p>
+          </form>
+          <noscript><p class="callout">The calculator needs JavaScript. The rest of the page does not.</p></noscript>
+        </div>
+      </section>
 
-        <form id="calc-form" class="calc" novalidate>
-          <div class="calc-head">
-            <span>Task label</span>
-            <span>Best</span>
-            <span>Likely</span>
-            <span>Worst</span>
-            <span class="sr">Remove</span>
-          </div>
-          <div id="rows" class="rows" aria-live="polite"></div>
-          <div class="calc-actions">
-            <button type="button" class="btn ghost" id="add-row">Add task</button>
-            <button type="submit" class="btn primary">Recalculate</button>
-          </div>
-        </form>
+      <section class="wrap section" id="example" aria-labelledby="example-title">
+        <div class="section-head">
+          <h2 id="example-title">One brief, one draft</h2>
+        </div>
+        <div class="section-body flow">
+          <p>
+            <code>examples/riad-booking.md</code> is an invented brief for a small guesthouse. On the
+            right is the output of
+            <code>estimate-kit estimate examples/riad-booking.md --skip-review</code>, so it is still
+            marked as not reviewed. The full output also lists risks and assumptions for each task.
+          </p>
+          <div class="grid-2 compare">
+            <div>
+              <p class="label">Input brief</p>
+              <pre class="diagram" tabindex="0"># Riad Lotus booking site
 
-        <div class="totals" id="totals" aria-live="polite">
-          <dl>
-            <div><dt>Sum of best</dt><dd id="sum-best">—</dd></div>
-            <div><dt>Sum of likely</dt><dd id="sum-likely">—</dd></div>
-            <div><dt>Expected (PERT)</dt><dd id="sum-expected">—</dd></div>
-            <div><dt>Plausible range (±2σ)</dt><dd id="sum-range">—</dd></div>
-            <div><dt>Sum of worst</dt><dd id="sum-worst">—</dd></div>
-          </dl>
-          <p class="note">
-            The plausible range assumes independent tasks. Real projects are correlated, so treat
-            this band as a lower bound on uncertainty.
+A fictional brief for a small guesthouse in Marrakech. All names are invented.
+
+## Background
+
+- The owner currently takes bookings by phone and WhatsApp.
+- About 12 rooms, high season is October to April.
+
+## Public site
+
+- Landing page with photo gallery and a short story about the riad
+- Room pages with prices per night and a calendar showing availability
+- Contact form that emails the owner
+- Site available in English, French and Arabic
+
+## Booking
+
+- Guests pick dates and a room, then pay a 30% deposit online with Stripe
+  - Refund the deposit if the owner cancels
+- Confirmation email with the booking details
+- Reminder email three days before arrival
+
+## Owner area
+
+- Owner login with password reset
+- Admin screens to manage rooms, prices and blocked dates
+- Monthly report of bookings and income, exportable as a spreadsheet
+- Import existing bookings from the owner's Excel sheet
+
+## Launch
+
+- Deploy to a standard host with a custom domain and daily backups
+
+## Out of scope
+
+- Mobile app
+- Channel manager sync with Booking.com</pre>
+            </div>
+            <div class="flow">
+              <p class="label">Summary</p>
+              <div class="table-wrap">
+                <table>
+                  <tbody>
+                  <tr><th scope="row">Sum of best cases</th><td class="num">55.5</td></tr>
+                  <tr><th scope="row">Sum of likely cases</th><td class="num">111.5</td></tr>
+                  <tr><th scope="row">Expected (PERT)</th><td class="num">125.5</td></tr>
+                  <tr><th scope="row">Plausible range (expected ± 2 spread)</th><td class="num">105.6 to 145.4</td></tr>
+                  <tr><th scope="row">Sum of worst cases</th><td class="num">251.5</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Section</th>
+                  <th scope="col">Task</th>
+                  <th scope="col">Category</th>
+                  <th scope="col" class="num">Best</th>
+                  <th scope="col" class="num">Likely</th>
+                  <th scope="col" class="num">Worst</th>
+                  <th scope="col" class="num">Expected</th>
+                </tr>
+              </thead>
+              <tbody>
+                  <tr><td>Public site</td><td>Landing page with photo gallery and a short story about the riad</td><td>ui</td><td class="num">3.0</td><td class="num">7.0</td><td class="num">16.0</td><td class="num">7.8</td></tr>
+                  <tr><td>Public site</td><td>Room pages with prices per night and a calendar showing availability</td><td>ui</td><td class="num">3.0</td><td class="num">7.0</td><td class="num">16.0</td><td class="num">7.8</td></tr>
+                  <tr><td>Public site</td><td>Contact form that emails the owner</td><td>notifications</td><td class="num">3.0</td><td class="num">7.0</td><td class="num">16.0</td><td class="num">7.8</td></tr>
+                  <tr><td>Public site</td><td>Site available in English, French and Arabic</td><td>general</td><td class="num">2.5</td><td class="num">6.5</td><td class="num">15.5</td><td class="num">7.3</td></tr>
+                  <tr><td>Booking</td><td>Guests pick dates and a room, then pay a 30% deposit online with Stripe</td><td>payments</td><td class="num">10.0</td><td class="num">18.0</td><td class="num">40.0</td><td class="num">20.3</td></tr>
+                  <tr><td>Booking</td><td>Confirmation email with the booking details</td><td>notifications</td><td class="num">3.0</td><td class="num">7.0</td><td class="num">16.0</td><td class="num">7.8</td></tr>
+                  <tr><td>Booking</td><td>Reminder email three days before arrival</td><td>notifications</td><td class="num">3.0</td><td class="num">7.0</td><td class="num">16.0</td><td class="num">7.8</td></tr>
+                  <tr><td>Owner area</td><td>Owner login with password reset</td><td>auth</td><td class="num">6.0</td><td class="num">10.0</td><td class="num">20.0</td><td class="num">11.0</td></tr>
+                  <tr><td>Owner area</td><td>Admin screens to manage rooms, prices and blocked dates</td><td>admin</td><td class="num">8.0</td><td class="num">14.0</td><td class="num">30.0</td><td class="num">15.7</td></tr>
+                  <tr><td>Owner area</td><td>Monthly report of bookings and income, exportable as a spreadsheet</td><td>reporting</td><td class="num">5.0</td><td class="num">10.0</td><td class="num">22.0</td><td class="num">11.2</td></tr>
+                  <tr><td>Owner area</td><td>Import existing bookings from the owner&#x27;s Excel sheet</td><td>integration</td><td class="num">6.0</td><td class="num">12.0</td><td class="num">30.0</td><td class="num">14.0</td></tr>
+                  <tr><td>Launch</td><td>Deploy to a standard host with a custom domain and daily backups</td><td>devops</td><td class="num">3.0</td><td class="num">6.0</td><td class="num">14.0</td><td class="num">6.8</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Look at the multilingual row. No category keyword matched, so it got the generic range
+            with a language multiplier. A person would size that work differently. Catching rows
+            like that is what the review step is for.
+          </p>
+        </div>
+      </section>
+
+      <section class="wrap section" id="trust" aria-labelledby="trust-title">
+        <div class="section-head">
+          <h2 id="trust-title">How not to trust this tool</h2>
+        </div>
+        <div class="section-body flow">
+          <ul>
+            <li>
+              The hour figures in <code>rules.toml</code> are my rough starting points. They are not
+              measured from past projects and have not been calibrated against delivery times.
+            </li>
+            <li>
+              Categories come from keyword matching, not from understanding the task. Check the
+              Category column.
+            </li>
+            <li>
+              The plausible range assumes tasks are independent. One wrong assumption about a
+              client's data or approvals can slow many tasks together.
+            </li>
+            <li>
+              Anything the brief does not mention is not estimated: testing by others, meetings,
+              revisions, content and project management.
+            </li>
+            <li>
+              The output is a draft. Read every row, change what you disagree with, and do not send
+              it to a client unchecked.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="wrap section" aria-labelledby="status-title">
+        <div class="section-head">
+          <h2 id="status-title">What works</h2>
+        </div>
+        <div class="section-body flow">
+          <ul class="status">
+            <li>
+              <span class="tag tag-ok">works</span>
+              <span>Brief parsing: headings become sections, bullets become tasks, skippable sections are reported</span>
+            </li>
+            <li>
+              <span class="tag tag-ok">works</span>
+              <span>Rule-based ranges with risks and assumptions, all numbers in one TOML file</span>
+            </li>
+            <li>
+              <span class="tag tag-ok">works</span>
+              <span>Review step: accept, edit or drop each task. Without it, output is marked unreviewed</span>
+            </li>
+            <li>
+              <span class="tag tag-ok">works</span>
+              <span>Markdown and CSV export</span>
+            </li>
+            <li>
+              <span class="tag tag-partial">partial</span>
+              <span>LLM path behind <code>ESTIMATE_KIT_LLM=1</code>. Tested against mocked responses only, never against a live provider</span>
+            </li>
+            <li>
+              <span class="tag tag-no">not done</span>
+              <span>Calibration of the hour figures against real projects, and a PyPI release</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="wrap section" id="quickstart" aria-labelledby="quick-title">
+        <div class="section-head">
+          <h2 id="quick-title">Quickstart</h2>
+        </div>
+        <div class="section-body flow">
+          <div class="code">
+            <pre id="quickstart-code"><code>git clone https://github.com/mohamedtaqysalmi/estimate-kit
+cd estimate-kit
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+estimate-kit estimate examples/riad-booking.md</code></pre>
+            <button class="btn btn-small copy" type="button" data-copy="quickstart-code">Copy</button>
+          </div>
+          <p class="hint">
+            On Windows, activate with <code>.venv\Scripts\Activate.ps1</code>. The command asks
+            you to accept, edit or drop each task before it prints anything.
+          </p>
+          <div class="badges">
+            <a href="https://github.com/mohamedtaqysalmi/estimate-kit/actions/workflows/ci.yml"
+              ><img
+                alt="CI status"
+                width="110"
+                height="20"
+                src="https://github.com/mohamedtaqysalmi/estimate-kit/actions/workflows/ci.yml/badge.svg"
+            /></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="wrap section" aria-labelledby="how-title">
+        <div class="section-head">
+          <h2 id="how-title">How it works</h2>
+        </div>
+        <div class="section-body flow">
+          <p>
+            Each bullet becomes a task. The first matching category in <code>rules.toml</code> sets
+            the three hour figures, and modifiers such as real-time or multilingual scale them.
+            Ranges combine with the PERT formulas above, and nothing is exported until you have
+            been through the review.
+          </p>
+          <pre class="diagram" role="img" aria-label="Pipeline: Markdown brief, parse into tasks, keyword rules or optional LLM, three-point ranges, review of each task, export to Markdown or CSV.">brief.md
+   │
+   ▼
+parse headings and bullets ──► tasks
+   │
+   ▼
+keyword rules (default)   or   LLM (ESTIMATE_KIT_LLM=1, falls back to rules)
+   │
+   ▼
+best / likely / worst per task, risks, assumptions
+   │
+   ▼
+review: accept, edit or drop each task
+   │
+   ▼
+Markdown or CSV</pre>
+        </div>
+      </section>
+
+      <section class="wrap section" aria-labelledby="built-title">
+        <div class="section-head">
+          <h2 id="built-title">How I built it</h2>
+        </div>
+        <div class="section-body">
+          <div class="notes">
+            <article>
+              <h3>Every number lives in one file</h3>
+              <p>
+                The hours, keywords, risks and assumptions are in <code>rules.toml</code>. If you
+                disagree with a figure you can see where it came from and change it.
+              </p>
+            </article>
+            <article>
+              <h3>Ranges, and a total that is not a naive sum</h3>
+              <p>
+                Adding every worst case assumes everything goes wrong at once. The total uses PERT
+                expected values and combined spreads, and the summary still shows the plain sums
+                next to it so the gap is visible.
+              </p>
+            </article>
+            <article>
+              <h3>The review is not optional</h3>
+              <p>
+                Skipping it is possible only with <code>--skip-review</code>, and then the output
+                says it was not reviewed. I would rather the tool be slightly annoying than
+                produce a polished number nobody checked.
+              </p>
+            </article>
+            <article>
+              <h3>The LLM is a fallback-protected extra</h3>
+              <p>
+                It is off by default, the prompts are versioned in <code>prompts/v1/</code>, and
+                any failure falls back to the rules.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="wrap section" aria-labelledby="limits-title">
+        <div class="section-head">
+          <h2 id="limits-title">Limits and roadmap</h2>
+        </div>
+        <div class="section-body flow">
+          <ul>
+            <li>Only bullet lists under headings are read. Tables, prose requirements and several features in one bullet are not understood.</li>
+            <li>Keywords are English only.</li>
+            <li>No estimate here has been compared with how long the work really took.</li>
+          </ul>
+          <p>
+            Open work is tracked in the
+            <a href="https://github.com/mohamedtaqysalmi/estimate-kit/issues">issues</a>. To
+            contribute, start with
+            <a href="https://github.com/mohamedtaqysalmi/estimate-kit/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>.
           </p>
         </div>
       </section>
     </main>
 
-    <footer class="foot">
+    <footer class="wrap site-footer">
       <p>
-        MIT ·
-        <a href="https://github.com/mohamedtaqysalmi/estimate-kit">mohamedtaqysalmi/estimate-kit</a>
+        Built by <a href="https://github.com/mohamedtaqysalmi">Mohamed-Taqy Salmi</a> ·
+        <a href="https://www.linkedin.com/in/mohamedtaqysalmi">LinkedIn</a>
+      </p>
+      <p>
+        MIT licensed · <a href="https://github.com/mohamedtaqysalmi/estimate-kit">Source on GitHub</a>
       </p>
     </footer>
-    <script src="app.js"></script>
+
+    <script src="base.js" defer></script>
+    <script src="ranges.js" defer></script>
+    <script src="app.js" defer></script>
   </body>
 </html>

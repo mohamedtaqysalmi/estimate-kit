@@ -33,5 +33,7 @@ jobs:
         run: mypy
       - name: Tests
         run: pytest
+      - name: Calculator tests
+        run: node --test tests/js/
       - name: Build
         run: python -m build
