@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Rebuilt the Pages site on the shared plain page style. The range calculator now shares test vectors with the Python range math and rejects invalid best/likely/worst with a message.
+
 ### Added
 
 - Mandatory interactive review (`accept` / `edit` / `drop` per task) before export; `--skip-review` keeps the draft marked unreviewed.

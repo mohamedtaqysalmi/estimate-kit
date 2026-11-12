@@ -1,0 +1,63 @@
+/* estimate-kit: calculator-only layout rules. Everything else is base.css. */
+
+.calc input[type="number"] {
+  min-width: 4.5rem;
+}
+.calc input[type="text"] {
+  min-width: 11rem;
+}
+.calc td {
+  vertical-align: middle;
+}
+.calc td.num {
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+.calc input[aria-invalid="true"] {
+  border-color: var(--bad);
+}
+.calc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.calc-error {
+  border-left-color: var(--bad);
+}
+.calc-error p {
+  margin: 0 0 0.35rem;
+}
+.calc-error p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+
+.totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem 1.5rem;
+  margin: 0;
+}
+.totals div {
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line-soft);
+}
+.totals dt {
+  font: var(--step--1) / 1.4 var(--mono);
+  color: var(--muted);
+}
+.totals dd {
+  margin: 0;
+  font: 500 var(--step-1) / 1.3 var(--mono);
+}
+.compare {
+  align-items: start;
+}
+.compare > * {
+  min-width: 0;
+}
+.compare pre {
+  max-height: 32rem;
+  overflow: auto;
+}
