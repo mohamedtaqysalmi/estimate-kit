@@ -39,7 +39,7 @@ flowchart LR
 
 **Why:** Offline use stays the default. Prompt packs are versioned so past runs remain reproducible.
 
-**Trade-off:** Live provider behaviour is not exercised in CI; only parsing and config are unit-tested with a fake `post_chat`.
+**Trade-off:** Live provider behaviour is not exercised in CI. Config, request building, error handling, malformed output and the CLI fallback are tested with HTTP mocked. The key is only sent over https (http is accepted for localhost), and the brief text is sent to whatever provider is configured.
 
 ## ADR 4 — PERT totals with root-sum-of-squares spread
 
@@ -55,4 +55,4 @@ flowchart LR
 
 **Why:** Zero host cost, works on GitHub Pages, mirrors the CLI math for teaching.
 
-**Trade-off:** The site does not run the Python parser; the example output is a curated excerpt.
+**Trade-off:** The site does not run the Python parser. The example output on it is pasted from the CLI, and a test checks that every figure on the page matches a real run. The calculator's math is checked against the Python range math with shared test vectors.

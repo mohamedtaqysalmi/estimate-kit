@@ -23,8 +23,22 @@ def _h(value: float) -> str:
     return f"{value:.1f}"
 
 
+def _line(text: str) -> str:
+    return " ".join(text.split())
+
+
 def _cell(text: str) -> str:
-    return " ".join(text.split()).replace("|", "\\|")
+    return _line(text).replace("|", "\\|")
+
+
+# Spreadsheet programs run cells that start with these characters as formulas.
+_FORMULA_STARTS = ("=", "+", "-", "@")
+
+
+def _csv_text(text: str) -> str:
+    if text.lstrip().startswith(_FORMULA_STARTS):
+        return "'" + text
+    return text
 
 
 def _status_line(estimate: Estimate) -> str:
@@ -43,9 +57,9 @@ def to_csv(estimate: Estimate) -> str:
         h = item.hours
         writer.writerow(
             [
-                item.task.section,
-                item.task.title,
-                item.category,
+                _csv_text(item.task.section),
+                _csv_text(item.task.title),
+                _csv_text(item.category),
                 _h(h.best),
                 _h(h.likely),
                 _h(h.worst),
@@ -83,13 +97,13 @@ def to_markdown(estimate: Estimate) -> str:
     for item in estimate.tasks:
         h = item.hours
         lines.append(
-            f"| {_cell(item.task.section)} | {_cell(item.task.title)} | {item.category} "
+            f"| {_cell(item.task.section)} | {_cell(item.task.title)} | {_cell(item.category)} "
             f"| {_h(h.best)} | {_h(h.likely)} | {_h(h.worst)} | {_h(h.expected)} |"
         )
     lines += ["", "## Risks", ""]
-    lines += [f"- {r}" for r in estimate.risks] or ["- None recorded."]
+    lines += [f"- {_line(r)}" for r in estimate.risks] or ["- None recorded."]
     lines += ["", "## Assumptions", ""]
-    lines += [f"- {a}" for a in estimate.assumptions]
+    lines += [f"- {_line(a)}" for a in estimate.assumptions]
     if estimate.skipped_sections:
         lines += ["", "## Ignored sections", ""]
         lines += [f"- {_cell(s)}" for s in estimate.skipped_sections]

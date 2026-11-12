@@ -22,6 +22,13 @@ from dataclasses import dataclass
 PLAUSIBLE_SIGMAS = 2.0
 
 
+def _round_to(value: float, step: float) -> float:
+    # Above 2**52 every float is already a whole number, and value / step can overflow.
+    if value >= 2**52:
+        return value
+    return round(value / step) * step
+
+
 @dataclass(frozen=True)
 class ThreePoint:
     best: float
@@ -29,6 +36,11 @@ class ThreePoint:
     worst: float
 
     def __post_init__(self) -> None:
+        if not all(math.isfinite(v) for v in (self.best, self.likely, self.worst)):
+            raise ValueError(
+                f"best, likely and worst must be finite numbers, got {self.best}, "
+                f"{self.likely}, {self.worst}"
+            )
         if self.best < 0:
             raise ValueError(f"best must not be negative, got {self.best}")
         if not self.best <= self.likely <= self.worst:
@@ -52,7 +64,7 @@ class ThreePoint:
 
     def rounded(self, step: float = 0.5) -> ThreePoint:
         # Rounding is monotonic, so best <= likely <= worst still holds.
-        return ThreePoint(*(round(v / step) * step for v in (self.best, self.likely, self.worst)))
+        return ThreePoint(*(_round_to(v, step) for v in (self.best, self.likely, self.worst)))
 
 
 @dataclass(frozen=True)
