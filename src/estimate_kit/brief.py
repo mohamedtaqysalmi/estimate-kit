@@ -73,7 +73,7 @@ def _strip_front_matter(lines: list[str]) -> list[str]:
 
 
 def parse_brief(text: str, skip_sections: tuple[str, ...] = ()) -> Brief:
-    lines = _strip_front_matter(_COMMENT.sub("", text.removeprefix("﻿")).splitlines())
+    lines = _strip_front_matter(_COMMENT.sub("", text.removeprefix("\ufeff")).splitlines())
     title: str | None = None
     section = NO_SECTION
     skipping_level: int | None = None
