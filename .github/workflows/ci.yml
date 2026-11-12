@@ -34,6 +34,6 @@ jobs:
       - name: Tests
         run: pytest
       - name: Calculator tests
-        run: node --test tests/js/
+        run: node --test "tests/js/*.test.mjs"
       - name: Build
         run: python -m build
